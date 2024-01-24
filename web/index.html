@@ -18,11 +18,39 @@
         //htmx.logAll();
 
         function transform(event) {
-            console.log("--->>> ".concat(event.detail));
-            
 
-            let ciphers = JSON.parse(event.detail.xhr.response);
-            event.detail.serverResponse = ciphers.ciphersuites.map((element) => Object.keys(element)[0]);
+          let ciphers = JSON.parse(event.detail.xhr.response);
+          let suites = ciphers.ciphersuites.map((element) => Object.keys(element)[0]).join(":").trim();
+          let option = document.getElementById("server_select");
+          let selectedValue = option.value;
+          let result = "test";
+          console.log(selectedValue);
+
+          switch (selectedValue) {
+            case "nginx": 
+              // nginx
+              result = "ssl_protocols TLSv1.2 TLSv1.3;<br>";
+              result = result.concat("ssl_ciphers " + suites.trim() + ";<br>");
+              result = result.concat("ssl_prefer_server_ciphers off;<br>");
+              result = result.concat("ssl_stapling on;<br>");
+              result = result.concat("ssl_stapling_verify on;<br>");
+              break;
+            case "apache":
+              // apache
+              result = "SSLHonorCipherOrder on";
+              result = result.concat("SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1<br>");            
+              result = result.concat("SSLCipherSuite '" + suites + "'<br>");
+              result = result.concat("SSLUseStapling On<br>");
+              result = result.concat("SSLStaplingCache \"shmcb:logs/ssl_stapling(32768)\"<br>");
+              result = result.concat("SSLSessionTickets off<br>");
+              result = result.concat("SSLHonorCipherOrder off<br>");
+              break;
+            default: 
+              // default
+          }
+
+          console.log(result);
+          event.detail.serverResponse = result; 
         }
     </script>
 
@@ -30,82 +58,61 @@
 
 <body>
 <!-- ====== Navbar Section Start -->
-<div
-        class="ud-header absolute left-0 top-0 z-40 flex w-full items-center bg-transparent"
->
-    <div class="container">
-        <div class="relative -mx-4 flex items-center justify-between">
-            <div class="w-60 max-w-full px-4">
+<header class="flex flex-col">
+
+<div class="ud-header left-0 top-0 z-40 flex w-full items-center bg-primary">
+     <div class="container relative">
+            <div class="absolute left-0">
                 <a href="index.html" class="navbar-logo block w-full py-5">
                     <img
-                            src="assets/images/logo/logo-white.svg"
+                            src="assets/images/logosm.webp"
                             alt="logo"
-                            class="header-logo w-full"
+                            class="header-logo w-32"
                     />
                 </a>
             </div>
-                <div class="flex items-center justify-end pr-16 lg:pr-0">
-                   <div class="hidden sm:flex">
-                        <a
-                                href="signin.html"
-                                class="loginBtn px-[22px] py-2 text-base font-medium text-white hover:opacity-70"
-                        >
-                            Sign In
-                        </a>
-                        <a
-                                href="signup.html"
-                                class="signUpBtn rounded-md bg-white bg-opacity-20 px-6 py-2 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-dark"
-                        >
-                            Sign Up
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+              <div class="w-full px-4">
+                  <div class="hero-content wow fadeInUp mx-auto max-w-[780px] text-center" data-wow-delay=".2s">
+                      <h1 class="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
+                          server ciphers
+                      </h1>
+                      <h3 class="mb-6 text-2xl font-bold leading-snug text-white sm:text-2xl sm:leading-snug lg:text-2xl lg:leading-[1.2]">
+                          have your ciphers set right
+                      </h3>
+                  </div>
+              </div>
+          </div>
     </div>
-</div>
+        
+</header>
 <!-- ====== Navbar Section End -->
 
 <!-- ====== Hero Section Start -->
-<div id="home" class="relative overflow-hidden bg-primary pt-[120px] md:pt-[130px] lg:pt-[160px]">
-    <div class="container">
-        <div class="-mx-4 flex flex-wrap items-center">
-            <div class="w-full px-4">
-                <div class="hero-content wow fadeInUp mx-auto max-w-[780px] text-center" data-wow-delay=".2s">
-                    <h1 class="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                        server ciphers
-                    </h1>
-                    <h3 class="mb-6 text-2xl font-bold leading-snug text-white sm:text-2xl sm:leading-snug lg:text-2xl lg:leading-[1.2]">
-                        have your ciphers set right
-                    </h3>
-                </div>
-            </div>
-        </div>
+<div id="home" class="overflow-y-scroll flex-1 bg-primary pt-[80px] md:pt-[90px] lg:pt-[110px]">
+<div class="container">
+        
     </div>
-    <div class="container mb-8">
-        <select class="max-h-1.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" name="server" id="server_select" hx-params="none" hx-trigger="load,change" hx-get="/api/ciphers/" hx-swap="innerHTML" hx-ext="transformResponse" hx-target="#config_string">
+
+   <div class="container mb-8 mt-10">
+        <select class="mb-8  text-lg rounded-lg appearance-none row-start-1 w-80 text-center" name="server" id="server_select" hx-params="none" hx-trigger="load,change" hx-get="/api/ciphers/" hx-swap="innerHTML" hx-ext="transformResponse" hx-target="#config_string">
             <option selected value="nginx">Nginx</option>
             <option value="apache">Apache</option>
         </select>
-        <div hx-on:htmx:before-swap="transform(event)" id="config_string" class="block p-2.5 w-max text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></div>
+        <div hx-on:htmx:before-swap="transform(event)" id="config_string" class="select-all bg-white break-words block p-2.5 w-100 text-lg rounded-lg border " ></div>
+    </div>
+    <div class="container">
+      <p class="text-white">Server ciphers simply utilizes the api of <a href="https://ciphersuite.info/" class="px-3 text-gray-7 hover:text-white">ciphersuite.info</a> to fetch the current set of recommended cipher suites. Afterwards it transforms the string for the configuration setting based on your webserver selection. Just c&p the text to your webserver config and you're good to go!</p>
+                                
     </div>
 </div>
 <!-- ====== Hero Section End -->
 
 <!-- ====== Footer Section Start -->
-<footer class="wow fadeInUp relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
+<footer class="wow fadeInUp fixed inset-x-0 bottom-0 relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
     <div class="container">
         <div class="-mx-4 flex flex-wrap">
             <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-4/12 xl:w-3/12">
                 <div class="mb-10 w-full">
-                    <a href="javascript:void(0)" class="mb-6 inline-block max-w-[160px]">
-                        <img src="assets/images/logo/logo-white.svg" alt="logo" class="max-w-full"
-                        />
-                    </a>
-                    <p class="mb-8 max-w-[270px] text-base text-gray-7">
-                        We create digital experiences for brands and companies by using
-                        technology.
-                    </p>
                     <div class="-mx-3 flex items-center">
                         <a
                                 href="javascript:void(0)"
@@ -184,30 +191,13 @@
                     </div>
                 </div>
             </div>
-            <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-2/12 xl:w-2/12">
-                <div class="mb-10 w-full">
-                    <h4 class="mb-9 text-lg font-semibold text-white">About Us</h4>
-                    <ul>
+            <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-8/12 xl:w-9/12">
+                <div class=" w-full">
+                    <ul class="flex flex-wrap items-center justify-center">
                         <li>
                             <a
                                     href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                Home
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                Features
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                                    class="me-4 md:me-6 text-base text-gray-7 hover:text-primary"
                             >
                                 About
                             </a>
@@ -215,131 +205,20 @@
                         <li>
                             <a
                                     href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                                    class="me-4 md:me-6 text-base text-gray-7 hover:text-primary"
                             >
-                                Testimonial
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-                <div class="mb-10 w-full">
-                    <h4 class="mb-9 text-lg font-semibold text-white">Features</h4>
-                    <ul>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                How it works
+                                Impress
                             </a>
                         </li>
                         <li>
                             <a
                                     href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                                    class="me-4 md:me-6 text-base text-gray-7 hover:text-primary"
                             >
                                 Privacy policy
                             </a>
                         </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                Terms of Service
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                Refund policy
-                            </a>
-                        </li>
                     </ul>
-                </div>
-            </div>
-            <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-                <div class="mb-10 w-full">
-                    <h4 class="mb-9 text-lg font-semibold text-white">
-                        Our Products
-                    </h4>
-                    <ul>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                LineIcons
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                Ecommerce HTML
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                TailAdmin
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                    href="javascript:void(0)"
-                                    class="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                            >
-                                PlainAdmin
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="w-full px-4 md:w-2/3 lg:w-6/12 xl:w-3/12">
-                <div class="mb-10 w-full">
-                    <h4 class="mb-9 text-lg font-semibold text-white">Latest blog</h4>
-                    <div class="flex flex-col gap-8">
-                        <a
-                                href="blog-details.html"
-                                class="group flex items-center gap-[22px]"
-                        >
-                            <div class="overflow-hidden rounded">
-                                <img
-                                        src="./assets/images/blog/blog-footer-01.jpg"
-                                        alt="blog"
-                                />
-                            </div>
-                            <span
-                                    class="max-w-[180px] text-base text-gray-7 group-hover:text-white"
-                            >
-                    I think really important to design with...
-                  </span>
-                        </a>
-                        <a
-                                href="blog-details.html"
-                                class="group flex items-center gap-[22px]"
-                        >
-                            <div class="overflow-hidden rounded">
-                                <img
-                                        src="./assets/images/blog/blog-footer-02.jpg"
-                                        alt="blog"
-                                />
-                            </div>
-                            <span
-                                    class="max-w-[180px] text-base text-gray-7 group-hover:text-white"
-                            >
-                    Recognizing the need is the primary...
-                  </span>
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -613,6 +492,7 @@
         </span>
     </div>
 </footer>
+</div>
 <!-- ====== Footer Section End -->
 
 <!-- ====== Back To Top Start -->

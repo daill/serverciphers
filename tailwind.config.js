@@ -1,5 +1,5 @@
 module.exports = {
-    content: ["./web/*.html", "./web/assets/**/*.js"],
+    content: ["./web/**/*.{html, js}"],
     darkMode: "class",
     theme: {
         screens: {
