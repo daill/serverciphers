@@ -12,13 +12,12 @@ fn rocket() -> _ {
 
 #[get("/api/ciphers")]
 async fn get_ciphers() -> String {
-    let res = reqwest::get("https://ciphersuite.info/api/cs/security/recommended/")
+    reqwest::get("https://ciphersuite.info/api/cs/security/recommended/")
         .await
         .unwrap()
         .text()
         .await
-        .unwrap();
-    return res;
+        .unwrap()
 }
 
 #[get("/")]
@@ -33,8 +32,8 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
     let ext = file.extension().unwrap().to_str().unwrap();
     match ext {
         "css" | "js" | "png" | "webp" | "ico" | "svg" => {
-            return NamedFile::open(Path::new("web").join(file)).await.ok();
+            NamedFile::open(Path::new("web").join(file)).await.ok()
         }
-        _ => return None,
+        _ => None,
     }
 }

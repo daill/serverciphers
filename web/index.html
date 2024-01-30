@@ -30,7 +30,7 @@
             case "nginx": 
               // nginx
               result = "ssl_protocols TLSv1.2 TLSv1.3;<br>";
-              result = result.concat("ssl_ciphers " + suites.trim() + ";<br>");
+              result = result.concat("ssl_ciphers \"" + suites.trim() + "\";<br>");
               result = result.concat("ssl_prefer_server_ciphers off;<br>");
               result = result.concat("ssl_stapling on;<br>");
               result = result.concat("ssl_stapling_verify on;<br>");
@@ -56,7 +56,7 @@
 
 </head>
 
-<body>
+<body class="bg-primary">
 <!-- ====== Navbar Section Start -->
 <header class="flex flex-col">
 
@@ -101,14 +101,14 @@
         <div hx-on:htmx:before-swap="transform(event)" id="config_string" class="select-all bg-white break-words block p-2.5 w-100 text-lg rounded-lg border " ></div>
     </div>
     <div class="container">
-      <p class="text-white">Server ciphers simply utilizes the api of <a href="https://ciphersuite.info/" class="px-3 text-gray-7 hover:text-white">ciphersuite.info</a> to fetch the current set of recommended cipher suites. Afterwards it transforms the string for the configuration setting based on your webserver selection. Just c&p the text to your webserver config and you're good to go!</p>
+      <p class="text-white mb-20">Server ciphers simply utilizes the api of <a href="https://ciphersuite.info/" class="px-3 text-gray-7 hover:text-white">ciphersuite.info</a> to fetch the current set of recommended cipher suites. Afterwards it transforms the string for the configuration setting based on your webserver selection. Just c&p the text to your webserver config and you're good to go!</p>
                                 
     </div>
 </div>
 <!-- ====== Hero Section End -->
 
 <!-- ====== Footer Section Start -->
-<footer class="wow fadeInUp fixed inset-x-0 bottom-0 relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
+<footer class="wow fadeInUp inset-x-0 bottom-0 fixed z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
     <div class="container">
         <div class="-mx-4 flex flex-wrap">
             <div class="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-4/12 xl:w-3/12">
